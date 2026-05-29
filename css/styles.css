@@ -7,7 +7,7 @@
     --success: #25D366;
     --gray: #f8f9fa;
     --text: #333;
-    --facebook: #1877F2; /* Added Facebook Color */
+    --facebook: #1877F2;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -166,49 +166,65 @@ h1 { text-align: center; color: var(--primary); margin: 20px 0; }
 .producto p { font-size: 14px; color: #666; flex-grow: 1; margin-bottom: 10px; }
 .producto strong { font-size: 20px; color: var(--primary-dark); margin-bottom: 15px; display: block; }
 
-/* --- NEW SHARE BUTTONS STYLES --- */
-.share-buttons {
+.producto-actions {
     display: flex;
     gap: 10px;
-    margin-bottom: 15px;
-}
-
-.share-buttons a {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px 0;
-    border-radius: 8px;
-    text-decoration: none;
-    color: white;
-    font-size: 13px;
-    font-weight: bold;
-    transition: opacity 0.2s, transform 0.2s;
-}
-
-.share-buttons a:hover {
-    opacity: 0.85;
-    transform: translateY(-2px);
-}
-
-.btn-share-wa {
-    background: var(--success);
-}
-
-.btn-share-fb {
-    background: var(--facebook);
-}
-/* ------------------------------ */
-
-.producto button {
-    width: 100%;
     margin-top: auto;
+}
+
+.producto-actions .btn-add-cart {
+    flex: 1;
     padding: 12px;
     font-weight: bold;
     font-size: 16px;
 }
+
+.btn-share {
+    background: #607D8B;
+    padding: 12px 15px;
+    border-radius: 8px;
+    position: relative;
+    cursor: pointer;
+    border: none;
+    color: white;
+    font-size: 16px;
+}
+
+.share-dropdown {
+    position: absolute;
+    bottom: 50px;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: none;
+    flex-direction: column;
+    z-index: 10;
+    overflow: hidden;
+    min-width: 160px;
+}
+
+.share-dropdown.active {
+    display: flex;
+}
+
+.share-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.share-dropdown a:hover {
+    background: #f4f6fb;
+}
+
+.share-dropdown .icon-whatsapp { color: #25D366; font-size: 20px; }
+.share-dropdown .icon-facebook { color: #1877F2; font-size: 20px; }
 
 .overlay {
     position: fixed;
@@ -291,9 +307,9 @@ button:hover { opacity: 0.8; }
 .btn-success { background: var(--success); }
 .botones { display: grid; gap: 10px; margin-top: 20px; }
 
-.btn-success { width: 150 px;  height: auto; }
-#btnPrint { width: 150 px;  height: auto; }
-.btn-danger { width: 150 px;  height: auto; }
+.btn-success { width: 150px; height: auto; }
+#btnPrint { width: 150px; height: auto; background: #607D8B; }
+.btn-danger { width: 150px; height: auto; }
 
 .totales { text-align: right; margin-top: 20px; }
 
@@ -334,7 +350,6 @@ button:hover { opacity: 0.8; }
     padding: 0;
 }
 
-/* Auth & Admin Forms */
 #formLogin, #formProducto {
     display: flex;
     flex-direction: column;
@@ -429,63 +444,3 @@ button:hover { opacity: 0.8; }
     .item-carrito { page-break-inside: avoid; }
     .botones { display: none; }
 }
-/* Share Button & Dropdown Styles */
-.producto-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: auto;
-}
-
-.producto-actions .btn-add-cart {
-    flex: 1;
-    padding: 12px;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.btn-share {
-    background: #607D8B;
-    padding: 12px 15px;
-    border-radius: 8px;
-    position: relative;
-    cursor: pointer;
-    border: none;
-    color: white;
-    font-size: 16px;
-}
-
-.share-dropdown {
-    position: absolute;
-    bottom: 50px;
-    right: 0;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    display: none;
-    flex-direction: column;
-    z-index: 10;
-    overflow: hidden;
-    min-width: 160px;
-}
-
-.share-dropdown.active {
-    display: flex;
-}
-
-.share-dropdown a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 15px;
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    transition: background 0.2s;
-}
-
-.share-dropdown a:hover {
-    background: #f4f6fb;
-}
-
-.share-dropdown .icon-whatsapp { color: #25D366; font-size: 20px; }
-.share-dropdown .icon-facebook { color: #1877F2; font-size: 20px; }
