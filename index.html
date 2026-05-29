@@ -4,13 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Catálogo de cotizaciones</title>
-    
-    <!-- Open Graph Meta Tags for WhatsApp & Facebook Previews -->
-    <meta property="og:title" content="Catálogo Profesional" id="og-title">
-    <meta property="og:description" content="Encuentra los mejores productos." id="og-desc">
-    <meta property="og:image" content="" id="og-image">
-    <meta property="og:url" content="" id="og-url">
-    <meta property="og:type" content="product">
+
+    <!-- CRITICAL: Dynamic OG Injection for Social Media Crawlers -->
+    <!-- Crawlers (WhatsApp/Facebook) do not run JS. This script runs synchronously to inject OG tags if a product ID is in the URL. -->
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const productId = params.get('producto');
+            if (productId) {
+                // Fetch product data from Supabase synchronously to inject into head
+                // Note: For 100% reliability in production, a backend/edge function is recommended. 
+                // This is a client-side workaround using synchronous XMLHttpRequest.
+                const SUPABASE_URL = 'https://yliohprzqxzpyyrpvlvh.supabase.co';
+                const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlsaW9ocHJ6cXh6cHl5cnB2bHZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxOTIyNTcsImV4cCI6MjA5MTc2ODI1N30.vvWoWAnHbfmZMEDWTKV8aGs6OsTKjpMam1h2OXVCjQI';
+                const req = new XMLHttpRequest();
+                req.open('GET', `${SUPABASE_URL}/rest/v1/productos?id=eq.${productId}&select=nombre,descripcion,precio,imagen_url`, false);
+                req.setRequestHeader('apikey', SUPABASE_KEY);
+                req.setRequestHeader('Authorization', `Bearer ${SUPABASE_KEY}`);
+                try {
+                    req.send(null);
+                    if (req.status === 200) {
+                        const data = JSON.parse(req.responseText);
+                        if (data && data.length > 0) {
+                            const p = data[0];
+                            const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+                            const priceStr = formatter.format(p.precio || 0);
+                            
+                            document.title = `${p.nombre} - Catálogo`;
+                            
+                            const metaTags = [
+                                { property: 'og:title', content: p.nombre },
+                                { property: 'og:description', content: `${p.descripcion || ''} - ${priceStr}` },
+                                { property: 'og:image', content: p.imagen_url || '' },
+                                { property: 'og:image:width', content: '1200' },
+                                { property: 'og:image:height', content: '630' },
+                                { property: 'og:url', content: window.location.href },
+                                { property: 'og:type', content: 'product' },
+                                { property: 'product:price:amount', content: p.precio },
+                                { property: 'product:price:currency', content: 'COP' }
+                            ];
+                            
+                            metaTags.forEach(tag => {
+                                const meta = document.createElement('meta');
+                                meta.setAttribute('property', tag.property);
+                                meta.setAttribute('content', tag.content);
+                                document.head.appendChild(meta);
+                            });
+                            return; // Exit if dynamic tags are injected
+                        }
+                    }
+                } catch (e) { console.error("OG Sync Error:", e); }
+            }
+            
+            // Fallback: Default tags if no product ID is found or fetch fails
+            const defaultTags = [
+                { property: 'og:title', content: 'Catálogo Profesional' },
+                { property: 'og:description', content: 'Encuentra los mejores productos.' },
+                { property: 'og:image', content: '' }, // Add a default catalog image URL here
+                { property: 'og:image:width', content: '1200' },
+                { property: 'og:image:height', content: '630' },
+                { property: 'og:url', content: window.location.href },
+                { property: 'og:type', content: 'website' }
+            ];
+            defaultTags.forEach(tag => {
+                const meta = document.createElement('meta');
+                meta.setAttribute('property', tag.property);
+                meta.setAttribute('content', tag.content);
+                document.head.appendChild(meta);
+            });
+        })();
+    </script>
+
+    <meta property="fb:app_id" content=""> <!-- Optional: Add your Facebook App ID here for analytics -->
 
     <link rel="stylesheet" href="css/styles.css">
 </head>
