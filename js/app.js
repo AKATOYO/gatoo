@@ -230,17 +230,10 @@ function toggleShareDropdown(productId) {
     dropdown.classList.toggle('active');
 }
 
-// 3. Update Open Graph Meta Tags dynamically for previews
-function updateMetaTags(product) {
+// 3. Generate the specific URL for a product
+function getProductUrl(product) {
     const baseUrl = window.location.origin + window.location.pathname;
-    const productUrl = `${baseUrl}?producto=${product.id}`;
-    
-    document.getElementById('og-title').setAttribute('content', product.nombre);
-    document.getElementById('og-desc').setAttribute('content', `${product.descripcion || ''} - ${money.format(product.precio)}`);
-    document.getElementById('og-image').setAttribute('content', product.imagen_url || '');
-    document.getElementById('og-url').setAttribute('content', productUrl);
-    
-    return productUrl;
+    return `${baseUrl}?producto=${product.id}`;
 }
 
 // 4. Share to WhatsApp
@@ -248,7 +241,7 @@ function shareWhatsApp(productId) {
     const p = productos.find(x => x.id === productId);
     if (!p) return;
     
-    const productUrl = updateMetaTags(p);
+    const productUrl = getProductUrl(p);
     const text = `¡Mira este producto!\n\n*${p.nombre}*\n${p.descripcion || ''}\n*Precio:* ${money.format(p.precio)}\n\nVer más: ${productUrl}`;
     
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
@@ -259,8 +252,8 @@ function shareFacebook(productId) {
     const p = productos.find(x => x.id === productId);
     if (!p) return;
     
-    const productUrl = updateMetaTags(p);
-    // Facebook uses the URL to scrape Open Graph meta tags
+    const productUrl = getProductUrl(p);
+    // Facebook scraper will hit the URL. The synchronous script in the HTML <head> will inject the OG tags for it!
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`, '_blank');
 }
 
