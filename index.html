@@ -5,77 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Catálogo de cotizaciones</title>
 
-    <!-- CRITICAL: Dynamic OG Injection for Social Media Crawlers -->
-    <!-- Crawlers (WhatsApp/Facebook) do not run JS. This script runs synchronously to inject OG tags if a product ID is in the URL. -->
+    <!-- META TAGS POR DEFECTO (Para la página principal sin producto) -->
+    <meta property="og:title" content="Catálogo Profesional">
+    <meta property="og:description" content="Encuentra los mejores productos del mercado.">
+    <meta property="og:image" content=""> <!-- Recomendado: URL absoluta a una imagen genérica del catálogo -->
+    <meta property="og:url" content="">
+    <meta property="og:type" content="website">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="fb:app_id" content=""> <!-- Opcional: ID de tu app de Facebook -->
+
+    <!-- INYECCIÓN SINCRÓNICA PARA CRAWLERS (WHATSAPP / FACEBOOK) -->
     <script>
         (function() {
             const params = new URLSearchParams(window.location.search);
             const productId = params.get('producto');
-            if (productId) {
-                // Fetch product data from Supabase synchronously to inject into head
-                // Note: For 100% reliability in production, a backend/edge function is recommended. 
-                // This is a client-side workaround using synchronous XMLHttpRequest.
-                const SUPABASE_URL = 'https://yliohprzqxzpyyrpvlvh.supabase.co';
-                const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlsaW9ocHJ6cXh6cHl5cnB2bHZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxOTIyNTcsImV4cCI6MjA5MTc2ODI1N30.vvWoWAnHbfmZMEDWTKV8aGs6OsTKjpMam1h2OXVCjQI';
+            if (!productId) return;
+
+            const SUPABASE_URL = 'https://yliohprzqxzpyyrpvlvh.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlsaW9ocHJ6cXh6cHl5cnB2bHZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxOTIyNTcsImV4cCI6MjA5MTc2ODI1N30.vvWoWAnHbfmZMEDWTKV8aGs6OsTKjpMam1h2OXVCjQI';
+            
+            try {
                 const req = new XMLHttpRequest();
                 req.open('GET', `${SUPABASE_URL}/rest/v1/productos?id=eq.${productId}&select=nombre,descripcion,precio,imagen_url`, false);
                 req.setRequestHeader('apikey', SUPABASE_KEY);
                 req.setRequestHeader('Authorization', `Bearer ${SUPABASE_KEY}`);
-                try {
-                    req.send(null);
-                    if (req.status === 200) {
-                        const data = JSON.parse(req.responseText);
-                        if (data && data.length > 0) {
-                            const p = data[0];
-                            const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
-                            const priceStr = formatter.format(p.precio || 0);
-                            
-                            document.title = `${p.nombre} - Catálogo`;
-                            
-                            const metaTags = [
-                                { property: 'og:title', content: p.nombre },
-                                { property: 'og:description', content: `${p.descripcion || ''} - ${priceStr}` },
-                                { property: 'og:image', content: p.imagen_url || '' },
-                                { property: 'og:image:width', content: '1200' },
-                                { property: 'og:image:height', content: '630' },
-                                { property: 'og:url', content: window.location.href },
-                                { property: 'og:type', content: 'product' },
-                                { property: 'product:price:amount', content: p.precio },
-                                { property: 'product:price:currency', content: 'COP' }
-                            ];
-                            
-                            metaTags.forEach(tag => {
-                                const meta = document.createElement('meta');
-                                meta.setAttribute('property', tag.property);
-                                meta.setAttribute('content', tag.content);
-                                document.head.appendChild(meta);
-                            });
-                            return; // Exit if dynamic tags are injected
-                        }
+                req.send(null);
+
+                if (req.status === 200) {
+                    const data = JSON.parse(req.responseText);
+                    if (data.length > 0) {
+                        const p = data[0];
+                        const priceStr = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(p.precio || 0);
+                        
+                        document.title = `${p.nombre} - Catálogo`;
+                        
+                        const updateMeta = (property, content) => {
+                            let meta = document.querySelector(`meta[property="${property}"]`);
+                            if (!meta) { meta = document.createElement('meta'); meta.setAttribute('property', property); document.head.appendChild(meta); }
+                            meta.setAttribute('content', content);
+                        };
+
+                        updateMeta('og:title', p.nombre);
+                        updateMeta('og:description', `${p.descripcion || 'Producto disponible'} - ${priceStr}`);
+                        updateMeta('og:image', p.imagen_url || '');
+                        updateMeta('og:url', window.location.href);
+                        updateMeta('og:type', 'product.item');
+                        updateMeta('product:price:amount', p.precio);
+                        updateMeta('product:price:currency', 'COP');
                     }
-                } catch (e) { console.error("OG Sync Error:", e); }
-            }
-            
-            // Fallback: Default tags if no product ID is found or fetch fails
-            const defaultTags = [
-                { property: 'og:title', content: 'Catálogo Profesional' },
-                { property: 'og:description', content: 'Encuentra los mejores productos.' },
-                { property: 'og:image', content: '' }, // Add a default catalog image URL here
-                { property: 'og:image:width', content: '1200' },
-                { property: 'og:image:height', content: '630' },
-                { property: 'og:url', content: window.location.href },
-                { property: 'og:type', content: 'website' }
-            ];
-            defaultTags.forEach(tag => {
-                const meta = document.createElement('meta');
-                meta.setAttribute('property', tag.property);
-                meta.setAttribute('content', tag.content);
-                document.head.appendChild(meta);
-            });
+                }
+            } catch (e) { console.error("OG Sync Error:", e); }
         })();
     </script>
-
-    <meta property="fb:app_id" content=""> <!-- Optional: Add your Facebook App ID here for analytics -->
 
     <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -152,8 +134,6 @@
                 <h2 id="adminTitle">Panel de Administrador</h2>
                 <button class="close-modal" id="btnCloseAdmin" aria-label="Cerrar panel">&times;</button>
             </div>
-            
-            <!-- Login Form -->
             <div id="authContainer">
                 <form id="formLogin" novalidate>
                     <h3>Iniciar Sesión</h3>
@@ -162,8 +142,6 @@
                     <button type="submit" class="btn-success">Ingresar</button>
                 </form>
             </div>
-
-            <!-- Admin Content (Hidden if not logged in) -->
             <div id="adminContainer" style="display: none;">
                 <div class="admin-welcome">
                     <span id="adminEmail"></span>
@@ -183,10 +161,7 @@
         </div>
     </div>
 
-    <!-- Back to Top Button -->
     <button id="btnTop" title="Volver arriba" aria-label="Volver arriba">↑</button>
-
-    <!-- Toast Notifications -->
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
